@@ -17,7 +17,7 @@ tabBtn.addEventListener("click", () => {
   tabBtn.innerText = sidebar.classList.contains("collapsed") ? "◀" : "▶";
 });
 
-// --- THE NEW "USER-FIRST" SMART ACCORDION ---
+// --- THE "USER-FIRST" SMART ACCORDION ---
 const accordionSections = Array.from(
   document.querySelectorAll(".smart-accordion"),
 );
@@ -25,34 +25,28 @@ const accordionSections = Array.from(
 function enforceSpace(protectedSection = null) {
   if (sidebar.classList.contains("collapsed")) return;
 
-  // Start from the bottom of the sidebar and work up
   for (let i = accordionSections.length - 1; i >= 0; i--) {
     let section = accordionSections[i];
-
-    // If the sidebar is overflowing...
     if (sidebar.scrollHeight > sidebar.clientHeight + 5) {
-      // And this section is open, AND it's not the one you just clicked...
       if (section !== protectedSection && section.open) {
-        section.open = false; // Close it to make room!
+        section.open = false;
       }
     } else {
-      break; // If we made enough room, stop closing things!
+      break;
     }
   }
 }
 
-// 1. When you physically click a box, it opens, and forces room for itself.
 accordionSections.forEach((el) => {
   el.addEventListener("toggle", (e) => {
     if (el.open) {
-      enforceSpace(el); // Passes itself as the VIP protected section
+      enforceSpace(el);
     }
   });
 });
 
-// 2. Only automatically crunch boxes if you physically resize the browser window.
 window.addEventListener("resize", () => {
-  enforceSpace(null); // No VIP section, just crunch if needed
+  enforceSpace(null);
 });
 
 // --- CORE APP LOGIC ---
@@ -192,17 +186,20 @@ function draw() {
   updateCribNotes();
   detectScale();
 
-  const padL = 80;
+  // FIXED: Increased Left Padding to accommodate large O/X labels
+  const padL = 90;
   const padR = 40;
   const drawW = w - padL - padR;
 
   const avgFretWidth = drawW / numFrets;
 
   let showTitle = document.getElementById("chk-title").checked;
-  let topClearance = showTitle ? 90 : 40;
+  // FIXED: Massive top clearance to guarantee title never touches strings
+  let topClearance = showTitle ? 120 : 50;
   let bottomClearance = 80;
 
-  const absoluteMaxSpacing = 150;
+  // FIXED: Slightly reigned in the absolute max spacing
+  const absoluteMaxSpacing = 120;
   const maxSafeHeight = (h - (topClearance + bottomClearance)) / 5;
 
   const sSpace = Math.max(
@@ -228,7 +225,9 @@ function draw() {
   let minFw =
     fretXPositions[startFret + numFrets] -
     fretXPositions[startFret + numFrets - 1];
-  let dotR = Math.min(minFw * 0.15, sSpace * 0.2);
+
+  // FIXED: Hard cap on dot sizes so they don't look like bowling balls
+  let dotR = Math.min(minFw * 0.15, sSpace * 0.15, 10);
 
   ctx.fillStyle = "#cccccc";
   for (let f = startFret + 1; f <= startFret + numFrets; f++) {
@@ -252,7 +251,9 @@ function draw() {
 
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  let toggleFontSize = Math.max(16, sSpace * 0.5);
+
+  // FIXED: Hard cap on Toggle Font Size
+  let toggleFontSize = Math.min(36, Math.max(16, sSpace * 0.4));
 
   for (let i = 0; i < 6; i++) {
     let y = padT + i * sSpace;
@@ -269,19 +270,20 @@ function draw() {
 
     if (state === "O") {
       ctx.fillStyle = "#1E90FF";
-      ctx.fillText("O", padL - 40, y);
+      ctx.fillText("O", padL - 45, y);
     } else if (state === "X") {
       ctx.fillStyle = "#FF4500";
-      ctx.fillText("X", padL - 40, y);
+      ctx.fillText("X", padL - 45, y);
     } else {
       ctx.fillStyle = "#bbbbbb";
-      ctx.fillText("—", padL - 40, y);
+      ctx.fillText("—", padL - 45, y);
     }
   }
 
   let bottomY = padT + 5 * sSpace;
-  let labelY = bottomY + Math.max(25, sSpace * 0.6);
-  let labelFontSize = Math.max(14, sSpace * 0.4);
+  // FIXED: Stop labels from drifting off the bottom
+  let labelY = bottomY + 30;
+  let labelFontSize = Math.min(24, Math.max(14, sSpace * 0.3));
 
   for (let f in fretXPositions) {
     f = parseInt(f);
@@ -309,7 +311,9 @@ function draw() {
   let allActiveSemitones = activePitches.map(
     (p) => (p - keyRoots[selectedKey] + 12) % 12,
   );
-  let radius = Math.min(minFw * 0.38, sSpace * 0.45);
+
+  // FIXED: Hard cap on Circle Size so they never overlap
+  let radius = Math.min(minFw * 0.35, sSpace * 0.42, 45);
 
   for (let m of markers) {
     if (stringStates[m.s] === "X" || stringStates[m.s] === "O") continue;
@@ -340,6 +344,7 @@ function draw() {
     ctx.fillText(label, cx, cy + radius * 0.4);
   }
 
+  // --- LIVE TITLE LOGIC ---
   if (showTitle) {
     let rawText = readout.innerText;
     if (rawText !== "Detected: No Notes Placed") {
@@ -347,7 +352,8 @@ function draw() {
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      let titleFontSize = Math.max(28, w / 30);
+      // FIXED: Hard cap on Title font so it never collides with strings
+      let titleFontSize = Math.min(45, Math.max(24, w / 30));
       ctx.font = `bold ${titleFontSize}px Arial`;
       ctx.fillText(cleanTitle, w / 2, 25);
     }
@@ -362,14 +368,18 @@ function getClicked(e) {
 
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
-  const drawW = w - 120;
+
+  // MUST match the draw loop exactly!
+  const padL = 90;
+  const padR = 40;
+  const drawW = w - padL - padR;
   const avgFretWidth = drawW / numFrets;
 
   let showTitle = document.getElementById("chk-title").checked;
-  let topClearance = showTitle ? 90 : 40;
+  let topClearance = showTitle ? 120 : 50;
   let bottomClearance = 80;
 
-  const absoluteMaxSpacing = 150;
+  const absoluteMaxSpacing = 120;
   const maxSafeHeight = (h - (topClearance + bottomClearance)) / 5;
   const sSpace = Math.max(
     30,
@@ -377,7 +387,7 @@ function getClicked(e) {
   );
   const padT = Math.max(topClearance, (h - sSpace * 5) / 2);
 
-  if (x < 75) {
+  if (x < padL - 10) {
     for (let i = 0; i < 6; i++) {
       if (Math.abs(y - (padT + i * sSpace)) < 20) {
         let curr = stringStates[i];
@@ -460,8 +470,6 @@ document.getElementById("btn-clear").addEventListener("click", () => {
   draw();
 });
 
-// THE FIX: ResizeObserver ONLY watches the canvas to ensure fluid drawing.
-// It no longer interferes with the sidebar at all!
 const resizeObserver = new ResizeObserver(() => {
   draw();
 });
