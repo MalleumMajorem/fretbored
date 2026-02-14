@@ -197,24 +197,7 @@ summary:hover {
     color: var(--accent);
 }
 
-/* --- RESPONSIVE GRACEFUL DEGRADATION --- */
-/* Hide extra info vertically on short screens */
-@media (max-height: 850px) {
-    #sec-targets {
-        display: none;
-    }
-}
-@media (max-height: 750px) {
-    #sec-progressions {
-        display: none;
-    }
-}
-@media (max-height: 600px) {
-    #sec-modes {
-        display: none;
-    }
-}
-
+/* --- RESPONSIVE ADJUSTMENTS --- */
 /* Reformat navbar on narrow screens */
 @media (max-width: 900px) {
     #detector-readout {

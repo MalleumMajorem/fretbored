@@ -17,36 +17,42 @@ tabBtn.addEventListener("click", () => {
   tabBtn.innerText = sidebar.classList.contains("collapsed") ? "◀" : "▶";
 });
 
-// --- SMART ACCORDION LOGIC ---
+// --- THE NEW "USER-FIRST" SMART ACCORDION ---
 const accordionSections = Array.from(
   document.querySelectorAll(".smart-accordion"),
 );
 
-function autoCollapseSidebar() {
+function enforceSpace(protectedSection = null) {
+  if (sidebar.classList.contains("collapsed")) return;
+
+  // Start from the bottom of the sidebar and work up
   for (let i = accordionSections.length - 1; i >= 0; i--) {
-    if (
-      sidebar.scrollHeight > sidebar.clientHeight + 10 &&
-      accordionSections[i].open
-    ) {
-      accordionSections[i].open = false;
+    let section = accordionSections[i];
+
+    // If the sidebar is overflowing...
+    if (sidebar.scrollHeight > sidebar.clientHeight + 5) {
+      // And this section is open, AND it's not the one you just clicked...
+      if (section !== protectedSection && section.open) {
+        section.open = false; // Close it to make room!
+      }
+    } else {
+      break; // If we made enough room, stop closing things!
     }
   }
 }
 
-accordionSections.forEach((el, index) => {
+// 1. When you physically click a box, it opens, and forces room for itself.
+accordionSections.forEach((el) => {
   el.addEventListener("toggle", (e) => {
     if (el.open) {
-      for (let i = accordionSections.length - 1; i >= 0; i--) {
-        if (
-          sidebar.scrollHeight > sidebar.clientHeight + 10 &&
-          i !== index &&
-          accordionSections[i].open
-        ) {
-          accordionSections[i].open = false;
-        }
-      }
+      enforceSpace(el); // Passes itself as the VIP protected section
     }
   });
+});
+
+// 2. Only automatically crunch boxes if you physically resize the browser window.
+window.addEventListener("resize", () => {
+  enforceSpace(null); // No VIP section, just crunch if needed
 });
 
 // --- CORE APP LOGIC ---
@@ -191,8 +197,19 @@ function draw() {
   const drawW = w - padL - padR;
 
   const avgFretWidth = drawW / numFrets;
-  const sSpace = Math.max(30, Math.min(avgFretWidth * 0.45, h / 8));
-  const padT = Math.max(90, (h - sSpace * 5) / 2.2);
+
+  let showTitle = document.getElementById("chk-title").checked;
+  let topClearance = showTitle ? 90 : 40;
+  let bottomClearance = 80;
+
+  const absoluteMaxSpacing = 150;
+  const maxSafeHeight = (h - (topClearance + bottomClearance)) / 5;
+
+  const sSpace = Math.max(
+    30,
+    Math.min(avgFretWidth * 0.85, maxSafeHeight, absoluteMaxSpacing),
+  );
+  const padT = Math.max(topClearance, (h - sSpace * 5) / 2);
 
   let rawPositions = [];
   for (let i = startFret; i <= startFret + numFrets; i++)
@@ -211,7 +228,7 @@ function draw() {
   let minFw =
     fretXPositions[startFret + numFrets] -
     fretXPositions[startFret + numFrets - 1];
-  let dotR = Math.min(minFw * 0.15, 8);
+  let dotR = Math.min(minFw * 0.15, sSpace * 0.2);
 
   ctx.fillStyle = "#cccccc";
   for (let f = startFret + 1; f <= startFret + numFrets; f++) {
@@ -323,9 +340,6 @@ function draw() {
     ctx.fillText(label, cx, cy + radius * 0.4);
   }
 
-  // --- THE NEW TOGGLE TITLE LOGIC ---
-  let showTitle = document.getElementById("chk-title").checked;
-
   if (showTitle) {
     let rawText = readout.innerText;
     if (rawText !== "Detected: No Notes Placed") {
@@ -350,8 +364,18 @@ function getClicked(e) {
   const h = canvas.clientHeight;
   const drawW = w - 120;
   const avgFretWidth = drawW / numFrets;
-  const sSpace = Math.max(30, Math.min(avgFretWidth * 0.45, h / 8));
-  const padT = Math.max(90, (h - sSpace * 5) / 2.2);
+
+  let showTitle = document.getElementById("chk-title").checked;
+  let topClearance = showTitle ? 90 : 40;
+  let bottomClearance = 80;
+
+  const absoluteMaxSpacing = 150;
+  const maxSafeHeight = (h - (topClearance + bottomClearance)) / 5;
+  const sSpace = Math.max(
+    30,
+    Math.min(avgFretWidth * 0.85, maxSafeHeight, absoluteMaxSpacing),
+  );
+  const padT = Math.max(topClearance, (h - sSpace * 5) / 2);
 
   if (x < 75) {
     for (let i = 0; i < 6; i++) {
@@ -398,9 +422,7 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 // --- UI EVENT LISTENERS ---
-// Wire the new checkbox up so it repaints the canvas the moment you click it!
 document.getElementById("chk-title").addEventListener("change", draw);
-
 document.getElementById("sel-key").addEventListener("change", (e) => {
   selectedKey = e.target.value;
   draw();
@@ -438,23 +460,21 @@ document.getElementById("btn-clear").addEventListener("click", () => {
   draw();
 });
 
+// THE FIX: ResizeObserver ONLY watches the canvas to ensure fluid drawing.
+// It no longer interferes with the sidebar at all!
 const resizeObserver = new ResizeObserver(() => {
   draw();
-  autoCollapseSidebar();
 });
-resizeObserver.observe(document.body);
+resizeObserver.observe(document.getElementById("canvas-container"));
 
-// --- SIMPLIFIED EXPORT MAGIC ---
+// --- EXPORT MAGIC ---
 document.getElementById("btn-export").addEventListener("click", () => {
   let rawText = readout.innerText;
   let cleanTitle = rawText.replace("Detected: ", "");
   if (rawText === "Detected: No Notes Placed") cleanTitle = "Blank_Fretboard";
 
   let link = document.createElement("a");
-
-  // The filename still safely uses the detected text even if the physical title is hidden!
   link.download = `Fretboard_${cleanTitle.replace(/[^a-zA-Z0-9#]/g, "_")}.png`;
-
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
