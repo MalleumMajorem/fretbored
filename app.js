@@ -186,7 +186,6 @@ function draw() {
   updateCribNotes();
   detectScale();
 
-  // FIXED: Increased Left Padding to accommodate large O/X labels
   const padL = 90;
   const padR = 40;
   const drawW = w - padL - padR;
@@ -194,11 +193,9 @@ function draw() {
   const avgFretWidth = drawW / numFrets;
 
   let showTitle = document.getElementById("chk-title").checked;
-  // FIXED: Massive top clearance to guarantee title never touches strings
   let topClearance = showTitle ? 120 : 50;
   let bottomClearance = 80;
 
-  // FIXED: Slightly reigned in the absolute max spacing
   const absoluteMaxSpacing = 120;
   const maxSafeHeight = (h - (topClearance + bottomClearance)) / 5;
 
@@ -225,8 +222,6 @@ function draw() {
   let minFw =
     fretXPositions[startFret + numFrets] -
     fretXPositions[startFret + numFrets - 1];
-
-  // FIXED: Hard cap on dot sizes so they don't look like bowling balls
   let dotR = Math.min(minFw * 0.15, sSpace * 0.15, 10);
 
   ctx.fillStyle = "#cccccc";
@@ -252,7 +247,6 @@ function draw() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  // FIXED: Hard cap on Toggle Font Size
   let toggleFontSize = Math.min(36, Math.max(16, sSpace * 0.4));
 
   for (let i = 0; i < 6; i++) {
@@ -281,7 +275,6 @@ function draw() {
   }
 
   let bottomY = padT + 5 * sSpace;
-  // FIXED: Stop labels from drifting off the bottom
   let labelY = bottomY + 30;
   let labelFontSize = Math.min(24, Math.max(14, sSpace * 0.3));
 
@@ -292,15 +285,19 @@ function draw() {
     ctx.beginPath();
     ctx.moveTo(x, padT);
     ctx.lineTo(x, bottomY);
+    // Ensure the actual Nut remains a thick bold line
     ctx.lineWidth = f === 0 ? 5 : 2;
     ctx.stroke();
 
     let isMarked = singleDots.includes(f) || doubleDots.includes(f);
+    let isFirstVisible = f === startFret; // THE ANCHOR FIX
+
     if (f === 0) {
       ctx.fillStyle = "#000";
       ctx.font = `bold ${labelFontSize}px Arial`;
       ctx.fillText("Nut", x, labelY);
-    } else if (isMarked) {
+    } else if (isMarked || isFirstVisible) {
+      // Show if marked OR if it's the anchor fret
       ctx.fillStyle = "#000";
       ctx.font = `bold ${labelFontSize}px Arial`;
       ctx.fillText(f.toString(), x, labelY);
@@ -312,7 +309,6 @@ function draw() {
     (p) => (p - keyRoots[selectedKey] + 12) % 12,
   );
 
-  // FIXED: Hard cap on Circle Size so they never overlap
   let radius = Math.min(minFw * 0.35, sSpace * 0.42, 45);
 
   for (let m of markers) {
@@ -352,7 +348,6 @@ function draw() {
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      // FIXED: Hard cap on Title font so it never collides with strings
       let titleFontSize = Math.min(45, Math.max(24, w / 30));
       ctx.font = `bold ${titleFontSize}px Arial`;
       ctx.fillText(cleanTitle, w / 2, 25);
@@ -369,7 +364,6 @@ function getClicked(e) {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
 
-  // MUST match the draw loop exactly!
   const padL = 90;
   const padR = 40;
   const drawW = w - padL - padR;
