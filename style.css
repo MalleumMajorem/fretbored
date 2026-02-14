@@ -1,0 +1,226 @@
+:root {
+    --bg-color: #f4f4f9;
+    --sidebar-bg: #dddddd;
+    --text-main: #333333;
+    --accent: #1e90ff;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-color);
+}
+
+/* --- LAYOUT --- */
+#main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    transition: width 0.3s;
+    position: relative;
+}
+
+/* Sidebar & Collapse Animation */
+#sidebar {
+    width: 330px;
+    background: var(--sidebar-bg);
+    padding: 20px;
+    overflow-y: auto;
+    border-left: 1px solid #ccc;
+    transition:
+        width 0.3s ease,
+        padding 0.3s ease;
+    flex-shrink: 0;
+}
+
+#sidebar.collapsed {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border: none;
+    overflow: hidden;
+}
+
+/* --- THE SEAMLESS FLOATING TAB --- */
+#toggle-tab {
+    position: absolute;
+    right: -1px;
+    top: 10px; /* Sits perfectly in the navbar */
+    background: var(--sidebar-bg);
+    color: var(--text-main);
+    border: 1px solid #ccc;
+    border-right: 1px solid var(--sidebar-bg); /* Erases the dividing line */
+    border-radius: 8px 0 0 8px;
+    padding: 15px 8px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 14px;
+    box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.05);
+    transition:
+        background 0.2s,
+        border-right-color 0.2s;
+}
+
+#toggle-tab:hover {
+    background: #d4d4d4;
+    border-right-color: #d4d4d4;
+}
+
+/* --- NAVBAR CONTROLS --- */
+#navbar {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: #eeeeee; /* Medium gray gradient step */
+    border-bottom: 1px solid #ccc;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+select,
+input[type="number"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+input[type="number"] {
+    width: 50px;
+}
+
+button.action-btn {
+    padding: 6px 12px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+#btn-clear {
+    background: #e0e0e0;
+    color: #333;
+}
+#btn-clear:hover {
+    background: #d0d0d0;
+}
+#btn-export {
+    background: #4caf50;
+    color: white;
+}
+#btn-export:hover {
+    background: #45a049;
+}
+
+#detector-readout {
+    margin-left: auto;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--accent);
+    padding-right: 45px; /* Permanent safety buffer for the tab */
+}
+
+/* --- CANVAS CONTAINER --- */
+#canvas-container {
+    flex: 1;
+    position: relative;
+    padding: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* --- SIDEBAR ELEMENTS & ACCORDIONS --- */
+h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: var(--text-main);
+}
+.crib-section {
+    margin-bottom: 10px;
+    border-bottom: 2px solid #aaa;
+    padding-bottom: 5px;
+}
+.crib-section h3 {
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    color: var(--text-main);
+}
+p,
+pre {
+    margin: 3px 0;
+    font-size: 13px;
+    color: #444;
+}
+
+details {
+    background: #ebebeb;
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+summary {
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    margin-bottom: 3px;
+}
+
+summary:hover {
+    color: var(--accent);
+}
+
+/* --- RESPONSIVE GRACEFUL DEGRADATION --- */
+/* Hide extra info vertically on short screens */
+@media (max-height: 850px) {
+    #sec-targets {
+        display: none;
+    }
+}
+@media (max-height: 750px) {
+    #sec-progressions {
+        display: none;
+    }
+}
+@media (max-height: 600px) {
+    #sec-modes {
+        display: none;
+    }
+}
+
+/* Reformat navbar on narrow screens */
+@media (max-width: 900px) {
+    #detector-readout {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+        text-align: center;
+    }
+}

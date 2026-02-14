@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Fretboard Theory Map</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div id="main-content">
+            <button id="toggle-tab" title="Toggle Sidebar">▶</button>
+
+            <div id="navbar">
+                <div class="control-group">
+                    <label>Key:</label>
+                    <select id="sel-key">
+                        <option value="C">C</option>
+                        <option value="G" selected>G</option>
+                        <option value="D">D</option>
+                        <option value="A">A</option>
+                        <option value="E">E</option>
+                        <option value="B">B</option>
+                        <option value="F#">F#</option>
+                        <option value="C#">C#</option>
+                        <option value="F">F</option>
+                        <option value="Bb">Bb</option>
+                        <option value="Eb">Eb</option>
+                        <option value="Ab">Ab</option>
+                        <option value="Db">Db</option>
+                        <option value="Gb">Gb</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Start Fret:</label>
+                    <input
+                        type="number"
+                        id="inp-start"
+                        value="0"
+                        min="0"
+                        max="23"
+                    />
+                </div>
+                <div class="control-group">
+                    <label>Visible Frets:</label>
+                    <input
+                        type="number"
+                        id="inp-frets"
+                        value="12"
+                        min="1"
+                        max="24"
+                    />
+                </div>
+
+                <div
+                    class="control-group"
+                    style="margin-left: 10px; cursor: pointer"
+                >
+                    <input
+                        type="checkbox"
+                        id="chk-title"
+                        checked
+                        style="cursor: pointer"
+                    />
+                    <label
+                        for="chk-title"
+                        style="
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: #333;
+                            cursor: pointer;
+                        "
+                        >Show Title</label
+                    >
+                </div>
+
+                <button
+                    id="btn-clear"
+                    class="action-btn"
+                    style="margin-left: 10px"
+                >
+                    Clear
+                </button>
+                <button id="btn-export" class="action-btn">
+                    Export Fretboard
+                </button>
+
+                <div id="detector-readout">Detected: No Notes Placed</div>
+            </div>
+
+            <div id="canvas-container">
+                <canvas id="fretboard"></canvas>
+            </div>
+        </div>
+
+        <div id="sidebar">
+            <h2 id="sb-title">Key of G Major</h2>
+            <div class="crib-section">
+                <p
+                    id="sb-rel-minor"
+                    style="font-weight: bold; color: var(--accent)"
+                >
+                    (Relative Minor: Em)
+                </p>
+                <p><strong>Scale Notes:</strong></p>
+                <p
+                    id="sb-scale-notes"
+                    style="font-size: 14px; font-weight: bold"
+                >
+                    G - A - B - C - D - E - F#
+                </p>
+            </div>
+
+            <details id="sec-chords" class="smart-accordion" open>
+                <summary>Diatonic Sandbox (Chords)</summary>
+                <pre id="sb-chords" style="font-family: monospace"></pre>
+            </details>
+
+            <details id="sec-modes" class="smart-accordion" open>
+                <summary>The 7 Modes</summary>
+                <pre id="sb-modes" style="font-family: monospace"></pre>
+            </details>
+
+            <details id="sec-progressions" class="smart-accordion" open>
+                <summary>Common Progressions</summary>
+                <p><strong>Pop/Punk (I - V - vi - IV):</strong></p>
+                <p id="sb-prog-pop" style="margin-bottom: 8px"></p>
+                <p><strong>Jazz Turnaround (ii - V - I):</strong></p>
+                <p id="sb-prog-jazz" style="margin-bottom: 8px"></p>
+                <p><strong>Blues/Rock (I - IV - V):</strong></p>
+                <p id="sb-prog-blues"></p>
+            </details>
+
+            <details id="sec-targets" class="smart-accordion" open>
+                <summary>Flavor / Target Notes</summary>
+                <p id="sb-targets-text"></p>
+            </details>
+        </div>
+
+        <script src="theory.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
